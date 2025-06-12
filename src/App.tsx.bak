@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react'
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import './App.css';
+import './App.css'
 import rawCards from '@/data/cards.json';
 import type { CardData, Position, SceneId } from '@/types/card';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -14,31 +14,48 @@ import ReplayIcon from '@mui/icons-material/Replay';
 import html2canvas from 'html2canvas';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import {
-    Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText,
-    DialogTitle, FormControl, Grid, IconButton, InputLabel, List, ListItem, MenuItem,
-    Paper, Select, Stack, Tab, Tabs, Tooltip, Typography
+    Box,
+    Button,
+    ButtonGroup,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    FormControl,
+    Grid,
+    IconButton,
+    InputLabel,
+    List,
+    ListItem,
+    MenuItem,
+    Paper,
+    Select,
+    Stack,
+    Tab,
+    Tabs,
+    Tooltip,
+    Typography,
 } from '@mui/material';
 import { DndContext, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { restrictToParentElement } from '@dnd-kit/modifiers';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { DraggableCard } from './components/DraggableCard';
 
-const SCENES: SceneId[] = ['a', 'b'];
-
 const initializeCards = (): CardData[] => {
     const saved = localStorage.getItem('cards');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+        return JSON.parse(saved);
+    }
+    const initialScenes: SceneId[] = ['a', 'b'];
     return rawCards.map(card => ({
         ...card,
         picked: false,
-        positions: SCENES.reduce((acc, scene) => ({ ...acc, [scene]: { x: 0, y: 0 } }), {} as Record<SceneId, Position>)
+        positions: initialScenes.reduce(
+            (acc, scene) => ({ ...acc, [scene]: { x: 0, y: 0 } }),
+            {} as Record<SceneId, Position>
+        ),
     }));
-};
-
-const initializeZOrder = (): Record<SceneId, string[]> => {
-    const saved = localStorage.getItem('zOrder');
-    if (saved) return JSON.parse(saved);
-    return SCENES.reduce((acc, scene) => ({ ...acc, [scene]: [] }), {} as Record<SceneId, string[]>);
 };
 
 export default function App() {
@@ -51,20 +68,17 @@ export default function App() {
     const [lastDraggedCardId, setLastDraggedCardId] = useState<string | null>(null);
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [shortcutOpen, setShortcutOpen] = useState(false);
-    const [zOrder, setZOrder] = useState<Record<SceneId, string[]>>(initializeZOrder);
+    const [zOrder, setZOrder] = useState<string[]>([]);
 
     const updateCard = (id: string, updater: (card: CardData) => CardData) => {
         setCards(prev => prev.map(card => (card.id === id ? updater(card) : card)));
     };
 
     const bringCardToFront = (id: string) => {
+
         setZOrder(prev => {
-            const sceneStack = prev[activeScene] || [];
-            const without = sceneStack.filter(cardId => cardId !== id);
-            const updated = [...without, id];
-            const next = { ...prev, [activeScene]: updated };
-            localStorage.setItem('zOrder', JSON.stringify(next));
-            return next;
+            const without = prev.filter(existingId => existingId !== id);
+            return [...without, id];
         });
     };
 
@@ -75,9 +89,7 @@ export default function App() {
 
     const handleReset = () => {
         localStorage.removeItem('cards');
-        localStorage.removeItem('zOrder');
         setCards(initializeCards());
-        setZOrder(initializeZOrder());
     };
 
     const handleSaveSceneImage = async () => {
@@ -111,13 +123,17 @@ export default function App() {
             v: () => setActiveScene(prev => (prev === 'a' ? 'b' : 'a')),
             '?': () => setShortcutOpen(true),
         };
+
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
             const action = keyActions[e.key];
             if (action) action();
         };
+
         window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
     }, [cards, activeSet, activeScene]);
 
     const handleDragEnd = ({ active, delta }: DragEndEvent) => {
@@ -148,7 +164,6 @@ export default function App() {
     );
 
     const availableSets = useMemo(() => [...new Set(cards.map(c => c.set))], [cards]);
-
 
     return (
         <ThemeProvider theme={theme}>
@@ -262,7 +277,8 @@ export default function App() {
                                         card={card}
                                         scene={activeScene}
                                         activeCardId={lastDraggedCardId}
-                                        zOrder={zOrder[activeScene] || []}
+                                        zOrder={zOrder}
+
                                     />
                                 ))}
                             </Box>
