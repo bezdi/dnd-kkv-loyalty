@@ -1,132 +1,112 @@
 [
     {
         "id": "101",
-        "text": "Évfordulós ajándék (pl. tartozékkupon)",
-        "set": "1"
+        "text": "Welcome ajándék a programba való belépéskor",
+        "sets": [
+            "1"
+        ]
     },
     {
         "id": "102",
-        "text": "Welcome ajándék a programba való belépéskor",
-        "set": "1"
-    },
-    {
-        "id": "103",
-        "text": "Teszt kártya 103",
-        "set": "2"
+        "text": "Szerződéskötés évfordulójakor adott ajándékok (pl. tartozékkupon)",
+        "sets": [
+            "2"
+        ]
     },
     {
         "id": "201",
-        "text": "Szóró ajándékok pl. esernyő, bögre, telefontok stb.",
-        "set": "1"
+        "text": "Egyszeri számlavég kedvezmény (10-20% kedvezmény)",
+        "sets": [
+            "1"
+        ]
+    },
+    {
+        "id": "202",
+        "text": "Készülék kedvezmény (pl: jelenlegi kedvezményes árlistán felül +10-20% kedvezmény)",
+        "sets": [
+            "2"
+        ]
     },
     {
         "id": "301",
-        "text": "Időszaki telkó ajánlatok, kedvezmények pl. korlátlan adat, roaming adat 3-5 napra",
-        "set": "1"
+        "text": "Ingyenes online előfizetés üzleti/gazdasági/szakmai tartalmakra ",
+        "sets": [
+            "1",
+            "2"
+        ]
     },
     {
         "id": "302",
-        "text": "Ingyenes online előfizetés szakmai tartalmakra ( pl. internetes cikkek portfolió, hvg, stb)",
-        "set": "1"
+        "text": "Partner ajánlatok, szolgáltatók, kereskedők által nyújtott extra kedvezmények (pl. irodaszerek, gasztro, üzemanyag, taxi)",
+        "sets": [
+            "1",
+            "2"
+        ]
     },
     {
         "id": "303",
-        "text": "Kedvezményes készülékvásárlás hűség lejárta előtt",
-        "set": "1"
+        "text": "Éves ajándék mobilvásárlás keret",
+        "sets": [
+            "1"
+        ]
     },
     {
         "id": "304",
-        "text": "Partner ajánlatok, Szolgáltatók, kereskedők által nyújtott extra kedvezmények ( pl. irodaszerek, gasztro, üzemanyag)",
-        "set": "1"
+        "text": "Ingyenes belépőjegyek sporteseményekre, színházba, moziba, koncertre",
+        "sets": [
+            "2"
+        ]
     },
     {
         "id": "401",
-        "text": "Készülék előregisztrációs kedvezmény (Iphone)",
-        "set": "1"
+        "text": "Gyorsított üzleti vezetékes internet hibaelhárítás (24h vagy 12h) ",
+        "sets": [
+            "2"
+        ]
+    },
+    {
+        "id": "402",
+        "text": "Mobil készülék szervízelés támogatása (pl. kupon, kedvezményes biztosítás)",
+        "sets": [
+            "1"
+        ]
+    },
+    {
+        "id": "403",
+        "text": "VIP Telekom Ügyfélkiszolgálás",
+        "sets": [
+            "1",
+            "2"
+        ]
+    },
+    {
+        "id": "404",
+        "text": "Szóróajándékok, ügyfélinterakciós ajándékok, pl. notesz, esernyő, bögre, telefontok stb",
+        "sets": [
+            "2"
+        ]
     },
     {
         "id": "501",
-        "text": "Díjmentes webinár az adott témában",
-        "set": "1"
+        "text": "Ingyenes tanácsadás, különböző üzleti témákban: workshop, személyes tanácsadás szolgáltatást kapna a Telekomtól",
+        "sets": [
+            "1",
+            "2"
+        ]
     },
     {
         "id": "502",
-        "text": "Ingyenes tanácsadás különböző üzleti témákban ( informatika, marketing)",
-        "set": "1"
+        "text": "IT oktatás vállalkozása dolgozói számára",
+        "sets": [
+            "1"
+        ]
     },
     {
-        "id": "601",
-        "text": "Ingyenes belépőjegyek sporteseményekre, színáz, mozi, koncert",
-        "set": "1"
-    },
-    {
-        "id": "602",
-        "text": "Telekomos rendezvény kapcsolatépítéssel",
-        "set": "1"
-    },
-    {
-        "id": "701",
-        "text": "Egyszeri számlavég kedvezmény 10-15EFt",
-        "set": "1"
-    },
-    {
-        "id": "702",
-        "text": "Készülék kedvezmény (1+1 Tphone)",
-        "set": "1"
-    },
-    {
-        "id": "703",
-        "text": "Tartozékkedvezmény 5-10eFt",
-        "set": "1"
-    },
-    {
-        "id": "801",
-        "text": "Dedikált telefonos ügyintéző",
-        "set": "1"
-    },
-    {
-        "id": "802",
-        "text": "Dedikált ügyfélmenedzser és ügyfélszolgálat",
-        "set": "1"
-    },
-    {
-        "id": "803",
-        "text": "Gyors szervízelés",
-        "set": "1"
-    },
-    {
-        "id": "804",
-        "text": "Ingyenes kiszállítás (webhsop)",
-        "set": "1"
-    },
-    {
-        "id": "805",
-        "text": "Ingyenes parkolás az ügyintézés idejére",
-        "set": "1"
-    },
-    {
-        "id": "806",
-        "text": "Skip the Vanda ( hibabejelentés)",
-        "set": "1"
-    },
-    {
-        "id": "807",
-        "text": "VIP Telekom Ügyfélkiszolgálás (  Telekom magasabb szintű vagy gyorsabb ügyfélkiszolgálást biztosítana díjmentesen, pl. telefonos ügyintézés során rövidebb várakozással, menüpontok választása nélkül, gyorsabb hibaelhárítással)",
-        "set": "1"
-    },
-    {
-        "id": "901",
-        "text": "Fix bb vagy mobil szolgáltatás kipróbálása díjmentesen 3 hónapra",
-        "set": "1"
-    },
-    {
-        "id": "902",
-        "text": "Informatikia Szolgáltatás kipróbálása díjmentesen 3 hóra ( Microsoft, Voicecenter)",
-        "set": "1"
-    },
-    {
-        "id": "903",
-        "text": "Teszt kártya 903",
-        "set": "2"
+        "id": "503",
+        "text": "Újonnan rendelt informatikai szolgáltatás kipróbálása díjmentesen 3 hónapra kötelezettségmentesen",
+        "sets": [
+            "1",
+            "2"
+        ]
     }
 ]

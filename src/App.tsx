@@ -22,23 +22,64 @@ import { DndContext, useSensor, useSensors, PointerSensor } from '@dnd-kit/core'
 import { restrictToParentElement } from '@dnd-kit/modifiers';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { DraggableCard } from './components/DraggableCard';
+import Scene from './scenes/Scene';
 
 const SCENES: SceneId[] = ['a', 'b'];
 
-const initializeCards = (): CardData[] => {
-    const saved = localStorage.getItem('cards');
-    if (saved) return JSON.parse(saved);
-    return rawCards.map(card => ({
-        ...card,
-        picked: false,
-        positions: SCENES.reduce((acc, scene) => ({ ...acc, [scene]: { x: 0, y: 0 } }), {} as Record<SceneId, Position>)
-    }));
+
+const getInitialPicked = (sets: string[]): Record<string, boolean> => {
+    return sets.reduce<Record<string, boolean>>((acc, setId) => {
+        acc[setId] = false;
+        return acc;
+    }, {});
+};
+const getInitialPositions = (
+    scenes: SceneId[],
+    sets: string[]
+): Record<SceneId, Record<string, Position>> => {
+    return scenes.reduce<Record<SceneId, Record<string, Position>>>(
+        (sceneAcc, scene) => {
+            sceneAcc[scene] = sets.reduce<Record<string, Position>>((setAcc, setId) => {
+                setAcc[setId] = { x: 0, y: 0 };
+                return setAcc;
+            }, {});
+            return sceneAcc;
+        },
+        {} as Record<SceneId, Record<string, Position>>
+    );
 };
 
-const initializeZOrder = (): Record<SceneId, string[]> => {
+const initializeCards = (): CardData[] => {
+    const saved = localStorage.getItem('cards');
+    if (saved) return JSON.parse(saved) as CardData[];
+
+    return rawCards.map((card: any): CardData => {
+        const sets: string[] = Array.isArray(card.sets)
+            ? card.sets
+            : Array.isArray(card.set)
+                ? card.set
+                : [card.set ?? '1'];
+
+        return {
+            id: card.id,
+            text: card.text,
+            sets,
+            picked: getInitialPicked(sets),
+            positions: getInitialPositions(SCENES, sets),
+        };
+    });
+};
+
+const initializeZOrder = (): Record<SceneId, Record<string, string[]>> => {
     const saved = localStorage.getItem('zOrder');
     if (saved) return JSON.parse(saved);
-    return SCENES.reduce((acc, scene) => ({ ...acc, [scene]: [] }), {} as Record<SceneId, string[]>);
+
+    return SCENES.reduce((sceneAcc, scene) => {
+        return {
+            ...sceneAcc,
+            [scene]: {}
+        };
+    }, {} as Record<SceneId, Record<string, string[]>>);
 };
 
 export default function App() {
@@ -51,7 +92,7 @@ export default function App() {
     const [lastDraggedCardId] = useState<string | null>(null);
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [shortcutOpen, setShortcutOpen] = useState(false);
-    const [zOrder, setZOrder] = useState<Record<SceneId, string[]>>(initializeZOrder);
+    const [zOrder, setZOrder] = useState<Record<SceneId, Record<string, string[]>>>(initializeZOrder);
 
     const updateCard = (id: string, updater: (card: CardData) => CardData) => {
         setCards(prev => prev.map(card => (card.id === id ? updater(card) : card)));
@@ -59,18 +100,32 @@ export default function App() {
 
     const bringCardToFront = (id: string) => {
         setZOrder(prev => {
-            const sceneStack = prev[activeScene] || [];
+            const sceneStack = prev[activeScene]?.[activeSet] || [];
             const without = sceneStack.filter(cardId => cardId !== id);
             const updated = [...without, id];
-            const next = { ...prev, [activeScene]: updated };
+            const next = {
+                ...prev,
+                [activeScene]: {
+                    ...prev[activeScene],
+                    [activeSet]: updated
+                }
+            };
             localStorage.setItem('zOrder', JSON.stringify(next));
             return next;
         });
     };
 
-    const cardsInActiveSet = useMemo(() => cards.filter(card => card.set === activeSet), [cards, activeSet]);
-    const pickedCards = useMemo(() => cardsInActiveSet.filter(card => card.picked), [cardsInActiveSet]);
-    const unpickedCards = useMemo(() => cardsInActiveSet.filter(card => !card.picked), [cardsInActiveSet]);
+    const cardsInActiveSet = useMemo(
+        () => cards.filter(card => card.sets.includes(activeSet)),
+        [cards, activeSet]
+    );
+
+    const pickedCards = useMemo(
+        () => cardsInActiveSet.filter(card => card.picked[activeSet]),
+        [cardsInActiveSet]
+    );
+
+    const unpickedCards = useMemo(() => cardsInActiveSet.filter(card => !card.picked[activeSet]), [cardsInActiveSet]);
     const nextCard = unpickedCards[0];
 
     const handleReset = () => {
@@ -101,14 +156,20 @@ export default function App() {
     useEffect(() => {
         const keyActions: Record<string, () => void> = {
             f: () => {
-                const next = cards.find(c => c.set === activeSet && !c.picked);
-                if (next) updateCard(next.id, c => ({ ...c, picked: true }));
+                const next = cards.find(c => c.sets.includes(activeSet) && !c.picked[activeSet]);
+                if (next) updateCard(next.id, c => ({
+                    ...c,
+                    picked: { ...c.picked, [activeSet]: true }
+                }));
             },
             d: () => {
-                const last = [...cards].reverse().find(c => c.set === activeSet && c.picked);
-                if (last) updateCard(last.id, c => ({ ...c, picked: false }));
+                const last = [...cards].reverse().find(c => c.sets.includes(activeSet) && c.picked[activeSet]);
+                if (last) updateCard(last.id, c => ({
+                    ...c,
+                    picked: { ...c.picked, [activeSet]: false }
+                }));
             },
-            v: () => setActiveScene(prev => (prev === 'a' ? 'b' : 'a')),
+            ' ': () => setActiveScene(prev => (prev === 'a' ? 'b' : 'a')),
             '?': () => setShortcutOpen(true),
         };
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -124,17 +185,21 @@ export default function App() {
         setCards(prev =>
             prev.map(card => {
                 if (card.id === active.id) {
-                    const { x, y } = card.positions[activeScene];
-                    return {
+                    const prevPos = card.positions[activeScene]?.[activeSet] || { x: 0, y: 0 };
+                    const updated = {
                         ...card,
                         positions: {
                             ...card.positions,
                             [activeScene]: {
-                                x: x + delta.x,
-                                y: y + delta.y,
-                            },
-                        },
+                                ...card.positions[activeScene],
+                                [activeSet]: {
+                                    x: prevPos.x + delta.x,
+                                    y: prevPos.y + delta.y,
+                                }
+                            }
+                        }
                     };
+                    return updated;
                 }
                 return card;
             })
@@ -147,7 +212,10 @@ export default function App() {
         })
     );
 
-    const availableSets = useMemo(() => [...new Set(cards.map(c => c.set))], [cards]);
+    const availableSets = useMemo(() => {
+        const allSets = cards.flatMap(c => c.sets);
+        return [...new Set(allSets)];
+    }, [cards]);
 
 
     return (
@@ -211,8 +279,11 @@ export default function App() {
                                         startIcon={<RemoveCircleIcon />}
                                         disabled={pickedCards.length === 0}
                                         onClick={() => {
-                                            const last = [...cards].reverse().find(c => c.set === activeSet && c.picked);
-                                            if (last) updateCard(last.id, c => ({ ...c, picked: false }));
+                                            const last = [...cards].reverse().find(c => c.sets.includes(activeSet) && c.picked[activeSet]);
+                                            if (last) updateCard(last.id, c => ({
+                                                ...c,
+                                                picked: { ...c.picked, [activeSet]: false }
+                                            }));
                                         }}
                                     >
                                         Visszavétel ({pickedCards.length})
@@ -224,7 +295,10 @@ export default function App() {
                                                 startIcon={<AddCircleIcon />}
                                                 disabled={!nextCard}
                                                 onClick={() => {
-                                                    if (nextCard) updateCard(nextCard.id, c => ({ ...c, picked: true }));
+                                                    if (nextCard) updateCard(nextCard.id, c => ({
+                                                        ...c,
+                                                        picked: { ...c.picked, [activeSet]: true }
+                                                    }));
                                                 }}
                                             >
                                                 Következő ({unpickedCards.length})
@@ -251,7 +325,7 @@ export default function App() {
                                     height: 800,
                                     position: 'relative',
                                     border: '1px solid gray',
-                                    backgroundImage: `url(/scene-a-bg.png)`,
+                                    // backgroundImage: `url(/scene-a-bg.png)`,
                                     backgroundSize: 'cover',
                                 }}
                             >
@@ -261,10 +335,13 @@ export default function App() {
                                         id={card.id}
                                         card={card}
                                         scene={activeScene}
+                                        activeSet={activeSet} // ← new
                                         activeCardId={lastDraggedCardId}
-                                        zOrder={zOrder[activeScene] || []}
+                                        zOrder={zOrder[activeScene]?.[activeSet] || []}
+
                                     />
                                 ))}
+                                <Scene name={activeScene} />
                             </Box>
                         </DndContext>
 
@@ -290,8 +367,8 @@ export default function App() {
                                     <ul style={{ paddingLeft: '1.2em' }}>
                                         <li><strong>f</strong>: Következő kártya hozzáadása</li>
                                         <li><strong>d</strong>: Utolsó kártya visszavétele</li>
-                                        <li><strong>v</strong>: Jelenet váltás (A &lt;-&gt; B)</li>
-                                        <li><strong>?</strong>: Ennek a segítségnek a megjelenítése</li>
+                                        <li><strong>[ SPACE ]</strong>: Jelenet váltás (A &lt;-&gt; B)</li>
+                                        <li><strong>?</strong>: A gyorsbillentyűk megjelenítése (ez az ablak)</li>
                                     </ul>
                                 </DialogContentText>
                             </DialogContent>

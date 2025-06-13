@@ -8,7 +8,7 @@ export interface Position {
 export interface CardData {
   id: string;
   text: string;
-  set: string;
-  picked: boolean;
-  positions: Record<SceneId, Position>;
+  sets: string[];
+  picked: Record<string, boolean>; // key = setId
+  positions: Record<SceneId, Record<string, Position>>;
 }
