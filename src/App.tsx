@@ -48,7 +48,7 @@ export default function App() {
     const [activeSet, setActiveSet] = useState<string>('1');
     const [activeScene, setActiveScene] = useState<SceneId>('a');
     const [cards, setCards] = useState<CardData[]>(initializeCards);
-    const [lastDraggedCardId, setLastDraggedCardId] = useState<string | null>(null);
+    const [lastDraggedCardId] = useState<string | null>(null);
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [shortcutOpen, setShortcutOpen] = useState(false);
     const [zOrder, setZOrder] = useState<Record<SceneId, string[]>>(initializeZOrder);

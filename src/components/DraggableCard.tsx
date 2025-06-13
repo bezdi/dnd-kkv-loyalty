@@ -1,5 +1,4 @@
 import { useDraggable } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
 import { Paper, Typography } from '@mui/material';
 import type { CardData, SceneId } from '@/types/card';
 
