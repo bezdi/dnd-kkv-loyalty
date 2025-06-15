@@ -1,38 +1,47 @@
 {
     "1": {
         "desc": "Állandó kedvezmények",
-        "color": "#800000"
+        "color": "#E9EFF7",
+        "borderColor": "#C7D7ED"
     },
     "2": {
         "desc": "Apró megleleptések",
-        "color": "#008000"
+        "color": "#F7E8F6",
+        "borderColor": "#EDC6EB"
     },
     "3": {
         "desc": "Időszaki kedvezmények",
-        "color": "#0000aa"
+        "color": "#F7E9E8",
+        "borderColor": "#EDCAC7"
     },
     "4": {
         "desc": "Korai hozzáférés ( termékek, szolgáltatások)",
-        "color": "#FFA500"
+        "color": "#FAF3E7",
+        "borderColor": "#F4E3C4"
     },
     "5": {
         "desc": "Oktatás, képzés, tanácsadás",
-        "color": "#800080"
+        "color": "#E6FAF1",
+        "borderColor": "#C1F5DE"
     },
     "6": {
         "desc": "Rendezvények, események",
-        "color": "#008080"
+        "color": "#008080",
+        "borderColor": "#20B2AA"
     },
     "7": {
         "desc": "Szerződés újrakötéshez kapcsolódó ajánlatok, kedvezmények",
-        "color": "#808000"
+        "color": "#808000",
+        "borderColor": "#BDB76B"
     },
     "8": {
         "desc": "Telekom ügyfélszolgálat/kiszolgálás",
-        "color": "#2E8B57"
+        "color": "#2E8B57",
+        "borderColor": "#3CB371"
     },
     "9": {
         "desc": "Try and buy kedvezmények",
-        "color": "#EADAAA"
+        "color": "#EADAAA",
+        "borderColor": "#D2B48C"
     }
 }

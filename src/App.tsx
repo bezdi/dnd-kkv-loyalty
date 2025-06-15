@@ -5,7 +5,9 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import './App.css';
 import rawCards from '@/data/cards.json';
+import rawDiscounts from '@/data/discounts.json';
 import type { CardData, Position, SceneId } from '@/types/card';
+import type { CategoryMap } from '@/types/discounts';
 import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -15,8 +17,8 @@ import html2canvas from 'html2canvas';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import {
     Box, Button, ButtonGroup, Dialog, DialogActions, DialogContent, DialogContentText,
-    DialogTitle, FormControl, Grid, IconButton, InputLabel, List, ListItem, MenuItem,
-    Paper, Select, Stack, Tab, Tabs, Tooltip, Typography
+    DialogTitle, FormControl, FormControlLabel, Grid, IconButton, InputLabel, List, ListItem, MenuItem,
+    Paper, Select, Stack, Switch, Tab, Tabs, TextField, Tooltip, Typography
 } from '@mui/material';
 import { DndContext, useSensor, useSensors, PointerSensor } from '@dnd-kit/core';
 import { restrictToParentElement } from '@dnd-kit/modifiers';
@@ -70,6 +72,7 @@ const initializeCards = (): CardData[] => {
     });
 };
 
+
 const initializeZOrder = (): Record<SceneId, Record<string, string[]>> => {
     const saved = localStorage.getItem('zOrder');
     if (saved) return JSON.parse(saved);
@@ -82,6 +85,16 @@ const initializeZOrder = (): Record<SceneId, Record<string, string[]>> => {
     }, {} as Record<SceneId, Record<string, string[]>>);
 };
 
+const sanitizeFilename = (input: string): string => {
+    return input
+        .toLowerCase()
+        .replace(/[á]/g, 'a')
+        .replace(/[é]/g, 'e')
+        .replace(/[í]/g, 'i')
+        .replace(/[óöő]/g, 'o')
+        .replace(/[úüű]/g, 'u')
+        .replace(/[^a-z0-9_-]/g, ''); // final strip: keep only safe characters
+};
 export default function App() {
     const theme = createTheme({});
     const sceneRef = useRef<HTMLDivElement>(null);
@@ -89,13 +102,53 @@ export default function App() {
     const [activeSet, setActiveSet] = useState<string>('1');
     const [activeScene, setActiveScene] = useState<SceneId>('a');
     const [cards, setCards] = useState<CardData[]>(initializeCards);
+    const [discounts, setDiscount] = useState<CategoryMap>(rawDiscounts);
     const [lastDraggedCardId] = useState<string | null>(null);
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [shortcutOpen, setShortcutOpen] = useState(false);
     const [zOrder, setZOrder] = useState<Record<SceneId, Record<string, string[]>>>(initializeZOrder);
+    const [highlightedCardId, setHighlightedCardId] = useState<string | null>(null);
+    const [showCardTooltips, setShowCardTooltips] = useState<boolean>(false);
+    const [identifier, setIdentifier] = useState<string>(() => {
+        return localStorage.getItem('identifier') || '';
+    });
+
+    const getInitialDropPosition = (): Position => {
+        return {
+            x: 1200 / 2 - 220 / 2, // assuming card is 220px wide
+            y: 800 - 90 // assuming card height + padding from bottom
+        };
+    };
 
     const updateCard = (id: string, updater: (card: CardData) => CardData) => {
-        setCards(prev => prev.map(card => (card.id === id ? updater(card) : card)));
+        setCards(prev =>
+            prev.map(card => {
+                if (card.id !== id) return card;
+
+                const updatedCard = updater({ ...card }); // clone shallowly
+
+                // Check if card has ever been moved
+                const hasAnyNonZeroPosition = Object.values(updatedCard.positions).some(scene =>
+                    Object.values(scene).some(pos => pos.x !== 0 || pos.y !== 0)
+                );
+
+                if (!hasAnyNonZeroPosition) {
+                    const newPositions: typeof updatedCard.positions = { ...updatedCard.positions };
+
+                    // Set initial drop position for current set in all scenes
+                    for (const sceneId of SCENES) {
+                        newPositions[sceneId] = {
+                            ...newPositions[sceneId],
+                            [activeSet]: getInitialDropPosition(),
+                        };
+                    }
+
+                    updatedCard.positions = newPositions;
+                }
+
+                return updatedCard;
+            })
+        );
     };
 
     const bringCardToFront = (id: string) => {
@@ -127,21 +180,34 @@ export default function App() {
 
     const unpickedCards = useMemo(() => cardsInActiveSet.filter(card => !card.picked[activeSet]), [cardsInActiveSet]);
     const nextCard = unpickedCards[0];
+    const lastPickedCard = useMemo(() =>
+        [...cards].reverse().find(c => c.sets.includes(activeSet) && c.picked[activeSet]),
+        [cards, activeSet]);
 
     const handleReset = () => {
         localStorage.removeItem('cards');
         localStorage.removeItem('zOrder');
+        localStorage.removeItem('identifier');
         setCards(initializeCards());
         setZOrder(initializeZOrder());
     };
 
     const handleSaveSceneImage = async () => {
         if (!sceneRef.current) return;
+
         try {
+            const now = new Date();
+            const pad = (n: number) => n.toString().padStart(2, '0');
+
+            const datePart = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${pad(now.getFullYear() % 100)}`;
+            const timePart = `${pad(now.getHours())}.${pad(now.getMinutes())}.${pad(now.getSeconds())}`;
+            const safeIdentifier = sanitizeFilename(identifier || 'unnamed');
+            const fileName = `${datePart}_${timePart}-${safeIdentifier}-${activeScene}.png`;
+
             const canvas = await html2canvas(sceneRef.current);
             const dataUrl = canvas.toDataURL('image/png');
             const link = document.createElement('a');
-            link.download = `scene-${activeScene}.png`;
+            link.download = fileName;
             link.href = dataUrl;
             link.click();
         } catch (error) {
@@ -149,9 +215,42 @@ export default function App() {
         }
     };
 
+    const handleSaveBothScenes = async () => {
+        if (!sceneRef.current) return;
+
+        const now = new Date();
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        const datePart = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${pad(now.getFullYear() % 100)}`;
+        const timePart = `${pad(now.getHours())}.${pad(now.getMinutes())}.${pad(now.getSeconds())}`;
+        const safeIdentifier = sanitizeFilename(identifier || 'unnamed');
+
+        const captureScene = async (sceneId: SceneId) => {
+            setActiveScene(sceneId);
+            await new Promise(resolve => setTimeout(resolve, 300)); // wait for scene to render
+
+            const canvas = await html2canvas(sceneRef.current as HTMLDivElement);
+            const fileName = `${datePart}_${timePart}-${safeIdentifier}-${sceneId}.png`;
+
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = dataUrl;
+            link.click();
+        };
+
+        const originalScene = activeScene;
+        for (const scene of SCENES) {
+            await captureScene(scene);
+        }
+        setActiveScene(originalScene);
+    };
+
     useEffect(() => {
         localStorage.setItem('cards', JSON.stringify(cards));
     }, [cards]);
+    useEffect(() => {
+        localStorage.setItem('identifier', identifier);
+    }, [identifier]);
 
     useEffect(() => {
         const keyActions: Record<string, () => void> = {
@@ -169,7 +268,7 @@ export default function App() {
                     picked: { ...c.picked, [activeSet]: false }
                 }));
             },
-            ' ': () => setActiveScene(prev => (prev === 'a' ? 'b' : 'a')),
+            g: () => setActiveScene(prev => (prev === 'a' ? 'b' : 'a')),
             '?': () => setShortcutOpen(true),
         };
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -221,10 +320,20 @@ export default function App() {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Box sx={{ p: 0 }}>
-                <Grid container spacing={2}>
+            <Box sx={{ p: 0, px: 2 }}>
+                <Grid container spacing={2} sx={{ width: "1444px" }}>
                     <Grid size={2} sx={{ pt: 6 }}>
                         <Stack spacing={2}>
+                            <FormControl fullWidth>
+                                <TextField
+                                    label="Azonosító"
+                                    size="small"
+                                    value={identifier}
+                                    onChange={(e) => setIdentifier(e.target.value)}
+                                    fullWidth
+                                    sx={{ mb: 2 }}
+                                />
+                            </FormControl>
                             <FormControl fullWidth>
                                 <InputLabel id="card-set-label">Kártya készlet</InputLabel>
                                 <Select
@@ -240,6 +349,16 @@ export default function App() {
                                         </MenuItem>
                                     ))}
                                 </Select>
+                                <FormControlLabel
+                                    sx={{ mt: 2, px: 1 }}
+                                    control={
+                                        <Switch
+                                            checked={showCardTooltips}
+                                            onChange={(e) => setShowCardTooltips(e.target.checked)}
+                                        />
+                                    }
+                                    label="Kártya információk"
+                                />
                             </FormControl>
                             <Button
                                 size="small"
@@ -265,30 +384,55 @@ export default function App() {
                                 </Tabs>
                             </Grid>
                             <Grid size={4} display="flex" justifyContent="flex-end" alignItems="center">
-                                <Tooltip title="Jelenet mentése képként">
-                                    <IconButton onClick={handleSaveSceneImage}
+                                <Tooltip title="Jelenetek mentése képként" disableInteractive arrow>
+                                    <IconButton onClick={handleSaveBothScenes}
                                         sx={{ mr: 2 }}
                                     >
                                         <PhotoCameraIcon />
                                     </IconButton>
                                 </Tooltip>
                                 <ButtonGroup>
-                                    <Button
-                                        variant="text"
-                                        color="secondary"
-                                        startIcon={<RemoveCircleIcon />}
-                                        disabled={pickedCards.length === 0}
-                                        onClick={() => {
-                                            const last = [...cards].reverse().find(c => c.sets.includes(activeSet) && c.picked[activeSet]);
-                                            if (last) updateCard(last.id, c => ({
-                                                ...c,
-                                                picked: { ...c.picked, [activeSet]: false }
-                                            }));
-                                        }}
+                                    <Tooltip
+                                        title={lastPickedCard ? `Utoljára lettet kártya ID: ${lastPickedCard.id}` : 'Nincs mit visszavenni'}
+                                        disableInteractive
+                                        arrow
                                     >
-                                        Visszavétel ({pickedCards.length})
-                                    </Button>
-                                    <Tooltip title={nextCard ? `Következő kártya ID: ${nextCard.id}` : 'Nincs több kártya'}>
+                                        <span>
+                                            <Button
+                                                variant="text"
+                                                color="secondary"
+                                                startIcon={<RemoveCircleIcon />}
+                                                disabled={!lastPickedCard}
+                                                onClick={() => {
+                                                    if (lastPickedCard) {
+                                                        updateCard(lastPickedCard.id, c => ({
+                                                            ...c,
+                                                            picked: { ...c.picked, [activeSet]: false }
+                                                        }));
+
+                                                        // Immediately calculate the next card to highlight
+                                                        const nextLast = [...cards]
+                                                            .reverse()
+                                                            .filter(c => c.id !== lastPickedCard.id) // exclude the one just removed
+                                                            .find(c => c.sets.includes(activeSet) && c.picked[activeSet]);
+
+                                                        setHighlightedCardId(nextLast?.id ?? null);
+                                                    }
+                                                }}
+                                                onMouseEnter={() => {
+                                                    if (lastPickedCard) setHighlightedCardId(lastPickedCard.id);
+                                                }}
+                                                onMouseLeave={() => setHighlightedCardId(null)}
+                                            >
+                                                Visszavétel ({pickedCards.length})
+                                            </Button>
+                                        </span>
+                                    </Tooltip>
+                                    <Tooltip
+                                        title={nextCard ? `Következő kártya ID: ${nextCard.id}` : 'Nincs több kártya'}
+                                        disableInteractive
+                                        arrow
+                                    >
                                         <span>
                                             <Button
                                                 variant="text"
@@ -324,24 +468,37 @@ export default function App() {
                                     width: 1200,
                                     height: 800,
                                     position: 'relative',
-                                    border: '1px solid gray',
+                                    border: '1px solid',
+                                    borderTop: 0,
+                                    borderColor: 'divider',
                                     // backgroundImage: `url(/scene-a-bg.png)`,
                                     backgroundSize: 'cover',
                                 }}
                             >
-                                {pickedCards.map(card => (
-                                    <DraggableCard
-                                        key={card.id}
-                                        id={card.id}
-                                        card={card}
-                                        scene={activeScene}
-                                        activeSet={activeSet} // ← new
-                                        activeCardId={lastDraggedCardId}
-                                        zOrder={zOrder[activeScene]?.[activeSet] || []}
+                                {pickedCards.map(card => {
+                                    const categoryId = Math.floor(Number(card.id) / 100).toString();
+                                    const color = discounts?.[categoryId as keyof CategoryMap]?.color || '#F2F6FA';
+                                    const borderColor = discounts?.[categoryId as keyof CategoryMap]?.borderColor || '#F2F6FA';
+                                    const categoryName = discounts?.[categoryId as keyof CategoryMap]?.desc || 'N/A';
 
-                                    />
-                                ))}
-                                <Scene name={activeScene} />
+                                    return (
+                                        <DraggableCard
+                                            key={card.id}
+                                            id={card.id}
+                                            card={card}
+                                            scene={activeScene}
+                                            activeSet={activeSet}
+                                            activeCardId={lastDraggedCardId}
+                                            zOrder={zOrder[activeScene]?.[activeSet] || []}
+                                            color={color}
+                                            borderColor={borderColor}
+                                            highlighted={card.id === highlightedCardId}
+                                            tooltip={showCardTooltips ? `ID: ${card.id} | Kategória: ${categoryName}` : undefined}
+
+                                        />
+                                    );
+                                })}
+                                <Scene name={activeScene} label={identifier} />
                             </Box>
                         </DndContext>
 
@@ -367,7 +524,7 @@ export default function App() {
                                     <ul style={{ paddingLeft: '1.2em' }}>
                                         <li><strong>f</strong>: Következő kártya hozzáadása</li>
                                         <li><strong>d</strong>: Utolsó kártya visszavétele</li>
-                                        <li><strong>[ SPACE ]</strong>: Jelenet váltás (A &lt;-&gt; B)</li>
+                                        <li><strong>g</strong>: Jelenet váltás (A &lt;-&gt; B)</li>
                                         <li><strong>?</strong>: A gyorsbillentyűk megjelenítése (ez az ablak)</li>
                                     </ul>
                                 </DialogContentText>

@@ -4,6 +4,7 @@ interface Props {
     name?: string;
     empty?: boolean;
     height?: number;
+    label?: string;
 }
 
 export default function SceneArea(
@@ -11,6 +12,7 @@ export default function SceneArea(
         name = '',
         empty = false,
         height = 15,
+        label = '',
     }: Props
 
 ) {
@@ -21,7 +23,7 @@ export default function SceneArea(
         borderTop: 1,
         borderColor: 'divider',
         display: 'flex',
-        backgroundColor: empty ? 'divider' : 'background.paper',
+        backgroundColor: empty ? '#cecece' : 'background.paper',
     }
 
     return (
@@ -35,12 +37,27 @@ export default function SceneArea(
                 alignItems: 'center',
                 p: 2,
                 justifyContent: 'center',
-                color: 'text.secondary',
+                color: 'text.primary',
+                fontWeight: 'bold',
             }} >
-                <Typography variant="h6" align="center">
+                <Typography variant="body1" align="center" fontWeight={400}>
                     {name ? name : "Scene Area"}
                 </Typography>
             </Box>}
+            {empty && label && (
+                <Box sx={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    justifyContent: 'right',
+                    color: 'text.secondary',
+                    fontStyle: 'italic',
+                    p: 1,
+                    opacity: 0.8,
+                }}>
+                    <Typography variant="caption">{label}</Typography>
+                </Box>
+            )}
         </Box >
 
     );

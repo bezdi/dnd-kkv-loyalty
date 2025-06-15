@@ -1,5 +1,5 @@
 import { useDraggable } from '@dnd-kit/core';
-import { Paper, Typography } from '@mui/material';
+import { Paper, Typography, Tooltip } from '@mui/material';
 import type { CardData, SceneId } from '@/types/card';
 
 interface Props {
@@ -10,6 +10,9 @@ interface Props {
     activeCardId: string | null;
     zOrder: string[];
     color?: string;
+    borderColor?: string;
+    highlighted?: boolean;
+    tooltip?: string;
 }
 
 export const DraggableCard: React.FC<Props> = ({
@@ -19,7 +22,11 @@ export const DraggableCard: React.FC<Props> = ({
     activeSet,
     activeCardId,
     zOrder,
-    color = "#F2F6FA" }) => {
+    color = "#F2F6FA",
+    borderColor = "#E0E0E0",
+    highlighted = false,
+    tooltip,
+}) => {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id });
     const index = zOrder.indexOf(card.id);
 
@@ -32,9 +39,10 @@ export const DraggableCard: React.FC<Props> = ({
         top: transform ? pos.y + (transform.y ?? 0) : pos.y,
         width: 220,
         minHeight: 80,
-        padding: 1,
+        py: 1,
+        px: 1,
         cursor: 'grab',
-        // border: '1px solid #ccc',
+        border: `1px solid ${color}`,
         transition: isDragging ? 'none' : 'box-shadow 0.2s ease, transform 0.2s ease',
         transform: isDragging ? 'scale(1.02)' : 'none',
         zIndex: index >= 0 ? 100 + index : 1,
@@ -42,19 +50,38 @@ export const DraggableCard: React.FC<Props> = ({
         display: 'flex',
         alignItems: 'center',
         textAlign: 'center',
+        "&:hover": {
+            zIndex: 1000,
+            border: `1px solid ${borderColor}`,
+        },
+        "&.highlighted": {
+            zIndex: 1000,
+            boxShadow: `0 0 10px ${borderColor}`,
+            border: "1px solid",
+            borderColor: "secondary.main",
+        },
     };
 
-    return (
+    const cardContent = (
         <Paper
             ref={setNodeRef}
             {...listeners}
             {...attributes}
             sx={style}
             elevation={isDragging ? 6 : 0}
+            className={`draggable-card ${highlighted ? 'highlighted' : ''}`}
         >
             <Typography variant='body2'>
                 {card.text}
             </Typography>
         </Paper>
+    );
+
+    return tooltip ? (
+        <Tooltip title={tooltip} disableInteractive arrow>
+            {cardContent}
+        </Tooltip>
+    ) : (
+        cardContent
     );
 };
