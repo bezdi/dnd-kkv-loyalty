@@ -1,4 +1,4 @@
-export type SceneId = "a" | "b";
+export type SceneId = "1" | "2";
 
 export interface Position {
   x: number;

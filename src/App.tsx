@@ -26,7 +26,7 @@ import type { DragEndEvent } from '@dnd-kit/core';
 import { DraggableCard } from './components/DraggableCard';
 import Scene from './scenes/Scene';
 
-const SCENES: SceneId[] = ['a', 'b'];
+const SCENES: SceneId[] = ['1', '2'];
 
 
 const getInitialPicked = (sets: string[]): Record<string, boolean> => {
@@ -60,7 +60,7 @@ const initializeCards = (): CardData[] => {
             ? card.sets
             : Array.isArray(card.set)
                 ? card.set
-                : [card.set ?? '1'];
+                : [card.set ?? 'a'];
 
         return {
             id: card.id,
@@ -99,8 +99,8 @@ export default function App() {
     const theme = createTheme({});
     const sceneRef = useRef<HTMLDivElement>(null);
 
-    const [activeSet, setActiveSet] = useState<string>('1');
-    const [activeScene, setActiveScene] = useState<SceneId>('a');
+    const [activeSet, setActiveSet] = useState<string>('a');
+    const [activeScene, setActiveScene] = useState<SceneId>('1');
     const [cards, setCards] = useState<CardData[]>(initializeCards);
     const [discounts, setDiscount] = useState<CategoryMap>(rawDiscounts);
     const [lastDraggedCardId] = useState<string | null>(null);
@@ -220,7 +220,8 @@ export default function App() {
 
         const now = new Date();
         const pad = (n: number) => n.toString().padStart(2, '0');
-        const datePart = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${pad(now.getFullYear() % 100)}`;
+        //const datePart = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${pad(now.getFullYear() % 100)}`;
+        const datePart = `${pad(now.getFullYear() % 100)}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}`;
         const timePart = `${pad(now.getHours())}.${pad(now.getMinutes())}.${pad(now.getSeconds())}`;
         const safeIdentifier = sanitizeFilename(identifier || 'unnamed');
 
@@ -268,7 +269,7 @@ export default function App() {
                     picked: { ...c.picked, [activeSet]: false }
                 }));
             },
-            g: () => setActiveScene(prev => (prev === 'a' ? 'b' : 'a')),
+            g: () => setActiveScene(prev => (prev === '1' ? '2' : '1')),
             '?': () => setShortcutOpen(true),
         };
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -335,17 +336,17 @@ export default function App() {
                                 />
                             </FormControl>
                             <FormControl fullWidth>
-                                <InputLabel id="card-set-label">Kártya készlet</InputLabel>
+                                <InputLabel id="card-set-label">Alminta</InputLabel>
                                 <Select
                                     labelId="card-set-label"
                                     size="small"
                                     value={activeSet}
-                                    label="Kártya készlet"
+                                    label="Alminta"
                                     onChange={(e) => setActiveSet(e.target.value)}
                                 >
                                     {availableSets.map(setId => (
                                         <MenuItem key={setId} value={setId}>
-                                            Készlet {setId}
+                                            "{setId.toUpperCase()}" alminta
                                         </MenuItem>
                                     ))}
                                 </Select>
@@ -379,8 +380,8 @@ export default function App() {
                         <Grid container alignItems="center" justifyContent="space-between">
                             <Grid size={8}>
                                 <Tabs value={activeScene} onChange={(e, val) => setActiveScene(val)}>
-                                    <Tab label="Jelenet A" value="a" />
-                                    <Tab label="Jelenet B" value="b" />
+                                    <Tab label="Táblázat 1" value="1" />
+                                    <Tab label="Táblázat 2" value="2" />
                                 </Tabs>
                             </Grid>
                             <Grid size={4} display="flex" justifyContent="flex-end" alignItems="center">
@@ -524,7 +525,7 @@ export default function App() {
                                     <ul style={{ paddingLeft: '1.2em' }}>
                                         <li><strong>f</strong>: Következő kártya hozzáadása</li>
                                         <li><strong>d</strong>: Utolsó kártya visszavétele</li>
-                                        <li><strong>g</strong>: Jelenet váltás (A &lt;-&gt; B)</li>
+                                        <li><strong>g</strong>: Jelenet váltás (1 &lt;-&gt; 2)</li>
                                         <li><strong>?</strong>: A gyorsbillentyűk megjelenítése (ez az ablak)</li>
                                     </ul>
                                 </DialogContentText>
