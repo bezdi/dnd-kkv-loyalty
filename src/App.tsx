@@ -495,6 +495,7 @@ export default function App() {
                                             borderColor={borderColor}
                                             highlighted={card.id === highlightedCardId}
                                             tooltip={showCardTooltips ? `ID: ${card.id} | Kategória: ${categoryName}` : undefined}
+                                            category={categoryName}
 
                                         />
                                     );

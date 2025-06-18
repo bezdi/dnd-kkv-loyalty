@@ -1,35 +1,35 @@
 [
     {
         "id": "101",
-        "text": "Belépéshez kapcsolódó ajándék | Welcome ajándék a programba való belépéskor",
+        "text": "Welcome ajándék a programba való belépéskor (pl. tartozékkupon, kedvezményes belépőjegy, Wolt+ tagság 9 hónapra)",
         "sets": [
             "a"
         ]
     },
     {
-        "id": "102",
-        "text": "Évfordulóhoz kapcsolódó ajándék | Szerződéskötés évfordulójakor adott ajándékok (pl. tartozékkupon)",
+        "id": "602",
+        "text": "Szerződéskötés évfordulójakor adott ajándékok (pl. tartozékkupon)",
         "sets": [
             "b"
         ]
     },
     {
         "id": "201",
-        "text": "Ajándék a szerződés újrakötésekor | Egyszeri számlavég kedvezmény (10-20% kedvezmény)",
+        "text": "Egyszeri számlavég kedvezmény (10-20% kedvezmény)",
         "sets": [
             "a"
         ]
     },
     {
         "id": "202",
-        "text": "Ajándék a szerződés újrakötésekor | Készülék kedvezmény (pl: jelenlegi kedvezményes árlistán felül +10-20% kedvezmény)",
+        "text": "Készülék kedvezmény (pl: jelenlegi kedvezményes árlistán felül +10-20% kedvezmény)",
         "sets": [
             "b"
         ]
     },
     {
         "id": "301",
-        "text": "Időszakonként ajánlott kedvezmények | Ingyenes online előfizetés üzleti/gazdasági/szakmai tartalmakra ",
+        "text": "Ingyenes online előfizetés üzleti/gazdasági/szakmai tartalmakra ",
         "sets": [
             "a",
             "b"
@@ -37,7 +37,7 @@
     },
     {
         "id": "302",
-        "text": "Időszakonként ajánlott kedvezmények | Partner ajánlatok, szolgáltatók, kereskedők által nyújtott extra kedvezmények (pl. irodaszerek, gasztro, üzemanyag, taxi)",
+        "text": "Partner ajánlatok, szolgáltatók, kereskedők által nyújtott extra kedvezmények (pl. irodaszerek, gasztro, üzemanyag, taxi, Telekom Egészség szolgáltatás)",
         "sets": [
             "a",
             "b"
@@ -45,35 +45,35 @@
     },
     {
         "id": "303",
-        "text": "Időszakonként ajánlott kedvezmények | Éves ajándék Mobilvásárlás app költési keret",
+        "text": "Éves ajándék Mobilvásárlás app költési keret",
         "sets": [
             "a"
         ]
     },
     {
         "id": "304",
-        "text": "Időszakonként ajánlott kedvezmények | Ingyenes páros belépőjegyek sporteseményekre, színházba, moziba, koncertre",
+        "text": "Ingyenes páros belépőjegyek sporteseményekre, színházba, moziba, koncertre",
         "sets": [
             "b"
         ]
     },
     {
         "id": "401",
-        "text": "Telekom ügyfélszolgálat/kiszolgálás | Mobil készülék szervízelés támogatása (kedvezménykupon)",
+        "text": "Mobil készülék szervízelés támogatása (kedvezménykupon)",
         "sets": [
             "b"
         ]
     },
     {
         "id": "402",
-        "text": "Telekom ügyfélszolgálat/kiszolgálás | Gyorsított (maximum 24 órán belüli) üzleti vezetékes internet hibaelhárítás",
+        "text": "Gyorsított (maximum 24 órán belüli) üzleti vezetékes internet hibaelhárítás",
         "sets": [
             "a"
         ]
     },
     {
         "id": "403",
-        "text": "Telekom ügyfélszolgálat/kiszolgálás | VIP Telekom Ügyfélkiszolgálás",
+        "text": "VIP Telekom Ügyfélkiszolgálás",
         "sets": [
             "a",
             "b"
@@ -81,14 +81,14 @@
     },
     {
         "id": "404",
-        "text": "Telekom ügyfélszolgálat/kiszolgálás | Szóróajándékok, amit személyes találkozáskor kaphat az ügyfél az ügyintézőtől pl. notesz, esernyő, bögre, telefontok stb.",
+        "text": "Szóróajándékok, amit személyes találkozáskor kaphat az ügyfél az ügyintézőtől pl. notesz, esernyő, bögre, telefontok stb.",
         "sets": [
             "b"
         ]
     },
     {
         "id": "501",
-        "text": "Digitalizáció, a cég fejlesztésének segítése | Ingyenes tanácsadás, különböző üzleti témákban: workshop, személyes tanácsadás szolgáltatás",
+        "text": "Ingyenes tanácsadás, különböző üzleti témákban, személyes tanácsadás szolgáltatás",
         "sets": [
             "a",
             "b"
@@ -96,14 +96,14 @@
     },
     {
         "id": "502",
-        "text": "Digitalizáció, a cég fejlesztésének segítése | IT oktatás az Önök munkavállalói számára",
+        "text": "IT oktatás az Önök munkavállalói számára",
         "sets": [
             "a"
         ]
     },
     {
         "id": "503",
-        "text": "Digitalizáció, a cég fejlesztésének segítése | Újonnan rendelt informatikai szolgáltatás kipróbálása díjmentesen 3 hónapra",
+        "text": "Újonnan rendelt informatikai szolgáltatás kipróbálása díjmentesen 3 hónapra",
         "sets": [
             "a",
             "b"

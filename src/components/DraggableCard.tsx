@@ -5,6 +5,7 @@ import type { CardData, SceneId } from '@/types/card';
 interface Props {
     id: string;
     card: CardData;
+    category?: string;
     scene: SceneId;
     activeSet: string;
     activeCardId: string | null;
@@ -18,6 +19,7 @@ interface Props {
 export const DraggableCard: React.FC<Props> = ({
     id,
     card,
+    category,
     scene,
     activeSet,
     activeCardId,
@@ -37,7 +39,7 @@ export const DraggableCard: React.FC<Props> = ({
         position: 'absolute' as const,
         left: transform ? pos.x + (transform.x ?? 0) : pos.x,
         top: transform ? pos.y + (transform.y ?? 0) : pos.y,
-        width: 220,
+        width: 220 * 1.2,
         minHeight: 80,
         py: 1,
         px: 1,
@@ -50,6 +52,8 @@ export const DraggableCard: React.FC<Props> = ({
         display: 'flex',
         alignItems: 'center',
         textAlign: 'center',
+        flexDirection: 'column',
+        flexWrap: 'wrap',
         "&:hover": {
             zIndex: 1000,
             border: `1px solid ${borderColor}`,
@@ -71,10 +75,13 @@ export const DraggableCard: React.FC<Props> = ({
             elevation={isDragging ? 6 : 0}
             className={`draggable-card ${highlighted ? 'highlighted' : ''}`}
         >
-            <Typography variant='body2'>
+            {category && <Typography variant='caption' color='text.secondary'>
+                {category}
+            </Typography>}
+            <Typography variant='body2' fontWeight={600}>
                 {card.text}
             </Typography>
-        </Paper>
+        </Paper >
     );
 
     return tooltip ? (
